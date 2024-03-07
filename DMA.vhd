@@ -371,9 +371,42 @@ begin
 	else
 		APB_PERROR_s <= '0';
 	end if;	
-		----
+			----------------------------------errors_s----------------------------
+	if  APB_PADDR_i /= "00000110" or  APB_PADDR_i /= "00000111" or APB_PADDR_i /= "00001000" then
+		errors_s <= x"00000001";
+	elsif  APB_PADDR_i = "00001000"  and dma_memory(6) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+		errors_s <= x"00000002";
+	elsif  APB_PADDR_i = "00001000"  and dma_memory(7) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+		errors_s <= x"00000003";
+	elsif  APB_PADDR_i = "00001000"  and to_integer(unsigned(dma_memory(6))) >= to_integer(unsigned(dma_memory(7))) then
+		errors_s <= x"00000004";
+	elsif  dma_memory(to_integer(unsigned(APB_PADDR_i))) /=  "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+		errors_s <= x"00000005";
+	elsif  ram_count_s =  "11111111" and state_IN = end_internal_IN then
+		errors_s <= x"00000006";	
+	elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 3*unsigned(ram_count_s)) or to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 3*unsigned(ram_count_s))) and (state_IN = read_ram1_IN) then
+		errors_s <= x"00000007";
+	elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 1 + 3*unsigned(ram_count_s)) or to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 1 + 3*unsigned(ram_count_s)) ) and state_IN = read_ram2_IN then
+		errors_s <= x"00000008";
+	elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 2 + 3*unsigned(ram_count_s)) or to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 2 + 3*unsigned(ram_count_s)) ) and state_IN = read_ram3_IN then
+		errors_s <= x"00000009";
+	elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(2)))  or to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(2))))  and state_IN = read_ram_spi_IN then
+		errors_s <= x"0000000A";	
+	elsif  i_error_spi =  '1' and state_spi = wait_spi and state_in = write_spi_IN then
+		errors_s <= x"0000000B";
+	elsif  i_error_spi =  '1' and state_spi = wait_spi and state_in = read_spi_IN then
+		errors_s <= x"0000000C";
+	elsif  i_error_spi =  '1' and state_spi = exchange_spi and state_in = read_spi_IN  then
+		errors_s <= x"0000000D";
+	elsif  i_error_spi =  '1' and state_spi = exchange_spi and state_in = write_spi_IN  then
+		errors_s <= x"0000000E";
+	elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(3)))  or to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(3))))  and state_IN = write_ram_IN then
+		errors_s <= x"0000000F";
+	else
+		errors_s <= x"00000000";
+	end if;
    end process;  
-	errors_s <= x"00000000";
+	
 	proces_dma_memory: 
 process (state_APB, state_SPI, state_IN, APB_PADDR_i, ram_count_s, errors_s, source_s, destination_s, flags_s, data_s)
 begin
