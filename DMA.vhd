@@ -127,7 +127,7 @@ process (Clk,Resetn, state_SPI, state_APB, ram_count_s, source_s, destination_s,
 		ELSIF (rising_edge(Clk)) then
 			CASE state_IN is 
 					when  idle_IN =>
-						if state_APB = access_APB and APB_PADDR_i = "00001000" then
+						if state_APB = access_APB and APB_PADDR_i = "00001000" and APB_PENABLE_i = '1' then
 							state_IN <= setup_IN;
 						end if;	
 					when setup_IN =>
