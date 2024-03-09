@@ -60,7 +60,7 @@ APB_PREADY_o <= APB_PREADY_s;
 state_APB_proc:
 	process (Clk,Resetn)
 	begin 
-		IF Resetn = '0' then 
+		IF Resetn = '0' or APB_PERROR_s = '1' then 
 			state_APB <= idle_APB;
 		ELSIF (rising_edge(Clk)) then
 			CASE state_APB is 
@@ -89,7 +89,7 @@ state_APB_proc:
 state_SPI_proc:
 process (Clk,Resetn)
 	begin 
-		IF Resetn = '0' then 
+		IF Resetn = '0' or APB_PERROR_s = '1' then 
 			state_SPI <= idle_SPI;
 		ELSIF (rising_edge(Clk)) then
 			CASE state_SPI is 
@@ -124,6 +124,8 @@ process (Clk,Resetn, state_SPI, state_APB, ram_count_s, source_s, destination_s,
 	begin 
 		IF Resetn = '0' then 
 			state_IN <= idle_IN;
+		elsif APB_PERROR_s = '1' then
+			state_IN <= error_IN; 
 		ELSIF (rising_edge(Clk)) then
 			CASE state_IN is 
 					when  idle_IN =>
@@ -337,12 +339,14 @@ begin
 					end if;
 		      end if;	
 			end if;
-	elsif  APB_PADDR_i = "00001000"  and dma_memory(6) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
-		APB_PERROR_s <= '1';
-	elsif  APB_PADDR_i = "00001000"  and dma_memory(7) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
-		APB_PERROR_s <= '1';
-	elsif  APB_PADDR_i = "00001000"  and to_integer(unsigned(dma_memory(6))) >= to_integer(unsigned(dma_memory(7))) then
-		APB_PERROR_s <= '1';
+	elsif state_APB /= idle_APB then 
+		if  APB_PADDR_i = "00001000"  and dma_memory(6) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" and state_APB = setup_APB then
+			APB_PERROR_s <= '1';
+		elsif  APB_PADDR_i = "00001000"  and dma_memory(7) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+			APB_PERROR_s <= '1';
+		elsif  APB_PADDR_i = "00001000"  and to_integer(unsigned(dma_memory(6))) >= to_integer(unsigned(dma_memory(7))) then
+			APB_PERROR_s <= '1';
+		end if;
 	elsif  dma_memory(to_integer(unsigned(APB_PADDR_i))) /=  "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" and state_APB = setup_APB then
 		APB_PERROR_s <= '1';
 	elsif  ram_count_s =  "11111111" and state_IN = end_internal_IN then
