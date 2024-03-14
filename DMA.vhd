@@ -5,13 +5,13 @@ use ieee.numeric_std.all;
 entity dma is 
 port
 (
-	o_tx_start_spi    	 : out STD_LOGIC;
-   i_tx_end_spi          : in  STD_LOGIC;
-   o_address_spi         : out STD_LOGIC_VECTOR(31 downto 0);
-   o_instruction_spi     : out STD_LOGIC;
-   i_data_parallel_spi   : in  STD_LOGIC_VECTOR(31 downto 0);
-   o_data_parallel_spi   : out STD_LOGIC_VECTOR(31 downto 0);
-	i_error_spi           : in  STD_LOGIC; 
+	SPI_START_o    	 	 : out STD_LOGIC;
+   SPI_END_i          	 : in  STD_LOGIC;
+   SPI_ADDRESS_o         : out STD_LOGIC_VECTOR(31 downto 0);
+   SPI_INSTRUCTION_o     : out STD_LOGIC;
+   SPI_RDATA_i   			 : in  STD_LOGIC_VECTOR(31 downto 0);
+   SPI_WDATA_o   			 : out STD_LOGIC_VECTOR(31 downto 0);
+	SPI_ERROR_i           : in  STD_LOGIC; 
 	
 	Clk        				 : in  STD_LOGIC;
    Resetn     				 : in  STD_LOGIC;
@@ -25,11 +25,11 @@ port
    APB_PRDATA_o      	 : out STD_LOGIC_VECTOR(31 downto 0);
 	APB_PERROR_o      	 : out STD_LOGIC;
 	
-	wr_en_1_ram    		 : out std_logic; 
-	data_in_1_ram  		 : out std_logic_vector	(31 downto 0); 
-   addr_in_1_ram  		 : out std_logic_vector	(31 downto 0);   
-   port_en_1_ram  		 : out std_logic;       
-   data_out_1_ram 		 : in  std_logic_vector	(31 downto 0)
+	RAM_WRITE_o    		 : out std_logic; 
+	RAM_WDATA_o  		 	 : out std_logic_vector	(31 downto 0); 
+   RAM_ADDRESS_o  		 : out std_logic_vector	(31 downto 0);   
+   RAM_PORTENABLER_o  	 : out std_logic;       
+   RAM_RDATA_i 		 	 : in  std_logic_vector	(31 downto 0)
 	);
 end entity;
 
@@ -105,14 +105,14 @@ begin
 						end if;
 				
 					when wait_SPI =>
-						if i_tx_end_spi = '1' then  
+						if SPI_END_i = '1' then  
 							state_SPI <= exchange_SPI;	
-						elsif i_error_spi = '1' then 
+						elsif SPI_ERROR_i = '1' then 
 							state_SPI <= idle_SPI;	
 						end if;
 						
 					when exchange_SPI =>
-						if(i_tx_end_spi = '1') or i_error_spi = '1' then
+						if(SPI_END_i = '1') or SPI_ERROR_i = '1' then
 							state_SPI <= idle_SPI;
 						end if;
 							
@@ -121,7 +121,7 @@ begin
 	end process;
 	
 	state_IN_proc:
-	process (Clk,Resetn, state_SPI, state_APB, DMA_Task_Counter_s, DMA_Address_Source_s, DMA_Address_Destination_s, DMA_Task_Flags_s(1), DMA_Data_s,APB_PERROR_s , i_error_spi)
+	process (Clk,Resetn, state_SPI, state_APB, DMA_Task_Counter_s, DMA_Address_Source_s, DMA_Address_Destination_s, DMA_Task_Flags_s(1), DMA_Data_s,APB_PERROR_s , SPI_ERROR_i)
 		begin 
 			IF Resetn = '0' then 
 				state_IN <= idle_IN;
@@ -132,7 +132,7 @@ begin
 					CASE state_IN is 
 						
 						when  idle_IN =>
-							if state_APB = access_APB and APB_PADDR_i = "00001000" and APB_PENABLE_i = '1' then
+							if state_APB = access_APB and APB_PADDR_i = "00001000"  and APB_PENABLE_i = '1' then --енаблер строка зависимость сделать
 								state_IN <= setup_IN;
 							end if;	
 							
@@ -173,7 +173,7 @@ begin
 						when write_SPI_IN =>	
 							if state_SPI = idle_SPI then 
 								state_IN <= end_internal_IN;
-							elsif i_error_spi = '1' then 
+							elsif SPI_ERROR_i = '1' then 
 								state_IN <= error_IN;	
 							end if;
 							
@@ -183,7 +183,7 @@ begin
 						when read_spi_IN =>
 							if state_SPI = idle_SPI then 
 								state_IN <= write_ram_IN;
-							elsif i_error_spi = '1' then 
+							elsif SPI_ERROR_i = '1' then 
 								state_IN <= error_IN;	 
 							end if;
 							
@@ -226,65 +226,65 @@ begin
 		else
 			APB_PRDATA_o <= (others => 'Z');
 		end if;
-	      ----------------------------port_en_1_ram-----------------
+	      ----------------------------RAM_PORTENABLER_o-----------------
 		if state_IN = read_source_IN or state_IN = read_dest_IN or state_IN = read_flags_IN or state_IN = read_ram_spi_IN or state_IN = write_ram_IN then
-			port_en_1_ram <= '1';
+			RAM_PORTENABLER_o <= '1';
 		else
-			port_en_1_ram <= '0';
+			RAM_PORTENABLER_o <= '0';
 		end if;
-			----------------------------------addr_in_1_ram-----------------
+			----------------------------------RAM_ADDRESS_o-----------------
 		if state_IN = read_source_IN then
-			addr_in_1_ram <= std_logic_vector(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 3*unsigned(DMA_Task_Counter_s));
+			RAM_ADDRESS_o <= std_logic_vector(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 3*unsigned(DMA_Task_Counter_s));
 		elsif state_IN = read_dest_IN then
-			addr_in_1_ram <= std_logic_vector(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 1 + 3*unsigned(DMA_Task_Counter_s));
+			RAM_ADDRESS_o <= std_logic_vector(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 1 + 3*unsigned(DMA_Task_Counter_s));
 		elsif state_IN = read_flags_IN then
-			addr_in_1_ram <= std_logic_vector(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 2 + 3*unsigned(DMA_Task_Counter_s));
+			RAM_ADDRESS_o <= std_logic_vector(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 2 + 3*unsigned(DMA_Task_Counter_s));
 		elsif state_IN = read_ram_spi_IN then
-			addr_in_1_ram <= DMA_Address_Source_s;
+			RAM_ADDRESS_o <= DMA_Address_Source_s;
 		elsif state_IN = write_ram_IN then
-			addr_in_1_ram <= DMA_Address_Destination_s;
+			RAM_ADDRESS_o <= DMA_Address_Destination_s;
 		else
-			addr_in_1_ram <=  (others => 'Z');
+			RAM_ADDRESS_o <=  (others => 'Z');
 		end if;
-			----------------------------------wr_en_1_ram-----------------
+			----------------------------------RAM_WRITE_o-----------------
 		if state_IN = write_ram_IN then
-			wr_en_1_ram <= '1';
+			RAM_WRITE_o <= '1';
 		else
-			wr_en_1_ram <= '0';
+			RAM_WRITE_o <= '0';
 		end if;
-		----------------------------------data_in_1_ram-----------------
+		----------------------------------RAM_WDATA_o-----------------
 		if state_IN = write_ram_IN then
-			data_in_1_ram <= DMA_Data_s;
+			RAM_WDATA_o <= DMA_Data_s;
 		else
-			data_in_1_ram <= (others => 'Z');
+			RAM_WDATA_o <= (others => 'Z');
 		end if;
-		----------------------------------o_tx_start_spi-----------------
+		----------------------------------SPI_START_o-----------------
 		if state_IN = read_spi_IN or state_IN = write_spi_IN then
-			o_tx_start_spi <= '1';
+			SPI_START_o <= '1';
 		elsif state_SPI = idle_SPI then
-			o_tx_start_spi <= '0';
+			SPI_START_o <= '0';
 		end if;
-		----------------------------------o_address_spi-----------------
+		----------------------------------SPI_ADDRESS_o-----------------
 		if state_IN = write_SPI_IN then
-			o_address_spi <= DMA_Address_Destination_s;
+			SPI_ADDRESS_o <= DMA_Address_Destination_s;
 		elsif state_IN = read_SPI_IN then 
-			o_address_spi <= DMA_Address_Source_s;
+			SPI_ADDRESS_o <= DMA_Address_Source_s;
 		else
-			o_address_spi <= (others => 'Z');
+			SPI_ADDRESS_o <= (others => 'Z');
 		end if;
-		----------------------------------o_instruction_spi-----------------
+		----------------------------------SPI_INSTRUCTION_o-----------------
 		if state_IN = write_SPI_IN then
-			o_instruction_spi <= '1';
+			SPI_INSTRUCTION_o <= '1';
 		elsif state_IN = read_SPI_IN then
-			o_instruction_spi <= '0';
+			SPI_INSTRUCTION_o <= '0';
 		else
-			o_instruction_spi <= 'Z';
+			SPI_INSTRUCTION_o <= 'Z';
 		end if;
-		----------------------------------o_data_parallel_spi-----------------
+		----------------------------------SPI_WDATA_o-----------------
 		if state_IN = write_SPI_IN then
-			o_data_parallel_spi <= DMA_Data_s;
+			SPI_WDATA_o <= DMA_Data_s;
 		else
-			o_data_parallel_spi <=  (others => 'Z');
+			SPI_WDATA_o <=  (others => 'Z');
 		end if;
 	end process;   
  
@@ -297,7 +297,7 @@ begin
 		elsif  state_IN = end_internal_IN then
 			DMA_Address_Source_s <= (others => 'Z');
 		elsif state_IN = read_source_IN and DMA_Address_Source_s = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
-			DMA_Address_Source_s <= data_out_1_ram;
+			DMA_Address_Source_s <= RAM_RDATA_i;
 		end if;
 			----------------------------------DMA_Address_Destination_s-----------------------------------------
 		if  state_IN = idle_IN then
@@ -305,7 +305,7 @@ begin
 		elsif  state_IN = end_internal_IN then
 			DMA_Address_Destination_s <= (others => 'Z');
 		elsif state_IN = read_dest_IN and DMA_Address_Destination_s = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"  then
-			DMA_Address_Destination_s <= data_out_1_ram;
+			DMA_Address_Destination_s <= RAM_RDATA_i;
 		end if;
 			----------------------------------DMA_Task_Flags_s-----------------------------------------
 		if  state_IN = idle_IN then
@@ -313,13 +313,13 @@ begin
 		elsif  state_IN = read_source_IN then
 			DMA_Task_Flags_s <= (others => 'Z');
 		elsif state_IN = read_flags_IN  and DMA_Task_Flags_s = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
-			DMA_Task_Flags_s <= data_out_1_ram;
+			DMA_Task_Flags_s <= RAM_RDATA_i;
 		end if; 
 		----------------------------------DMA_Data_s----------------------------
 		if  state_SPI = exchange_SPI  and state_IN = read_spi_IN then
-			DMA_Data_s <= i_data_parallel_spi;
+			DMA_Data_s <= SPI_RDATA_i;
 		elsif  state_IN = read_ram_spi_IN and DMA_Data_s = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
-			DMA_Data_s <= data_out_1_ram;
+			DMA_Data_s <= RAM_RDATA_i;
 		elsif  state_IN = setup_IN then  
 			DMA_Data_s <=  (others => 'Z');
 		elsif  state_APB = idle_APB then  
@@ -355,13 +355,13 @@ begin
 				DMA_Error_State_s <= x"00000008";
 			elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(2)))  or	 to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(2))))  and state_IN = read_ram_spi_IN then
 				DMA_Error_State_s <= x"00000009";	
-			elsif  (i_error_spi =  '1' and state_spi = wait_spi and state_in = write_spi_IN) or DMA_Error_State_s = x"0000000A" then
+			elsif  (SPI_ERROR_i =  '1' and state_spi = wait_spi and state_in = write_spi_IN) or DMA_Error_State_s = x"0000000A" then
 				DMA_Error_State_s <= x"0000000A";
-			elsif  i_error_spi =  '1' and state_spi = wait_spi and state_in = read_spi_IN then
+			elsif  SPI_ERROR_i =  '1' and state_spi = wait_spi and state_in = read_spi_IN then
 				DMA_Error_State_s <= x"0000000B";
-			elsif  i_error_spi =  '1' and state_spi = exchange_spi and state_in = read_spi_IN  then
+			elsif  SPI_ERROR_i =  '1' and state_spi = exchange_spi and state_in = read_spi_IN  then
 				DMA_Error_State_s <= x"0000000C";
-			elsif  i_error_spi =  '1' and state_spi = exchange_spi and state_in = write_spi_IN  then
+			elsif  SPI_ERROR_i =  '1' and state_spi = exchange_spi and state_in = write_spi_IN  then
 				DMA_Error_State_s <= x"0000000D";
 			elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(3)))  or	 to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(3))))  and state_IN = write_ram_IN then
 				DMA_Error_State_s <= x"0000000E";
