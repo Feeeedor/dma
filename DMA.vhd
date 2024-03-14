@@ -47,6 +47,7 @@ architecture dma_arch of dma is
 	signal APB_PREADY_s : STD_LOGIC;
 	signal APB_PERROR_s : STD_LOGIC;
 	
+	signal DMA_Enable_s : STD_LOGIC;
 	signal DMA_Data_s :  STD_LOGIC_VECTOR(31 downto 0);
 	signal DMA_Address_Source_s : std_logic_vector	 (31 downto 0);
 	signal DMA_Address_Destination_s : std_logic_vector	 (31 downto 0);
@@ -75,9 +76,9 @@ begin
 					state_APB <= access_APB;	
 							
 				when access_APB =>
-					if APB_PADDR_i = "00000110" or APB_PADDR_i = "00000111" then
+					if APB_PADDR_i = "00000111" or APB_PADDR_i = "00001000" then
 						state_APB <= setup_APB;
-					elsif APB_PADDR_i = "00001000" and APB_PWDATA_i = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+					elsif APB_PADDR_i = "00001001" and APB_PWDATA_i = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
 						state_APB <= setup_APB;
 					elsif APB_PREADY_s = '1' and  APB_PSELx='1' then
 						state_APB <= setup_APB;
@@ -132,7 +133,7 @@ begin
 					CASE state_IN is 
 						
 						when  idle_IN =>
-							if state_APB = access_APB and APB_PADDR_i = "00001000"  and APB_PENABLE_i = '1' then --енаблер строка зависимость сделать
+							if state_APB = access_APB and APB_PADDR_i = "00001001"  and dma_memory(0)(0) = '1' then 
 								state_IN <= setup_IN;
 							end if;	
 							
@@ -336,24 +337,24 @@ begin
 				----------------------------------DMA_Error_State_s----------------------------
 		if state_APB = idle_APB then 
 			DMA_Error_State_s <= x"00000000";
-		elsif  state_IN /= error_IN and state_APB = setup_APB and APB_PADDR_i /= "00000110" and APB_PADDR_i /= "00000111" and APB_PADDR_i /= "00001000" and APB_PWRITE_i = '1' then	
+		elsif  state_IN /= error_IN and state_APB = setup_APB and APB_PADDR_i /= "00000111" and APB_PADDR_i /= "00001000" and APB_PADDR_i /= "00001001" and APB_PWRITE_i = '1' then	
 			DMA_Error_State_s <= x"00000001";
-		elsif  state_IN /= error_IN and state_APB = setup_APB and APB_PADDR_i = "00001000"  and dma_memory(6) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then	
+		elsif  state_IN /= error_IN and state_APB = setup_APB and APB_PADDR_i = "00001001"  and dma_memory(7) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then	
 			DMA_Error_State_s <= x"00000002";
 		elsif state_IN /= error_IN and state_APB = access_APB then 
-			if  APB_PADDR_i = "00001000"  and dma_memory(7) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+			if  APB_PADDR_i = "00001001"  and dma_memory(8) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
 				DMA_Error_State_s <= x"00000003";
-			elsif  APB_PADDR_i = "00001000"  and to_integer(unsigned(dma_memory(6))) >= to_integer(unsigned(dma_memory(7))) then
+			elsif  APB_PADDR_i = "00001001"  and to_integer(unsigned(dma_memory(6))) >= to_integer(unsigned(dma_memory(7))) then
 				DMA_Error_State_s <= x"00000004";
 			elsif  DMA_Task_Counter_s =  "11111111" and state_IN = read_source_IN then
 				DMA_Error_State_s <= x"00000005";	
-			elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 3*unsigned(DMA_Task_Counter_s)) or	 to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 3*unsigned(DMA_Task_Counter_s))) and (state_IN = read_source_IN) then
+			elsif ( to_integer(unsigned(dma_memory(7))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 3*unsigned(DMA_Task_Counter_s)) or	 to_integer(unsigned(dma_memory(8))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 3*unsigned(DMA_Task_Counter_s))) and (state_IN = read_source_IN) then
 				DMA_Error_State_s <= x"00000006";
-			elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 1 + 3*unsigned(DMA_Task_Counter_s)) or	 to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 1 + 3*unsigned(DMA_Task_Counter_s)) ) and state_IN = read_dest_IN then
+			elsif ( to_integer(unsigned(dma_memory(7))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 1 + 3*unsigned(DMA_Task_Counter_s)) or	 to_integer(unsigned(dma_memory(8))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 1 + 3*unsigned(DMA_Task_Counter_s)) ) and state_IN = read_dest_IN then
 				DMA_Error_State_s <= x"00000007";
-			elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 2 + 3*unsigned(DMA_Task_Counter_s)) 	or to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 2 + 3*unsigned(DMA_Task_Counter_s)) ) and state_IN = read_flags_IN then
+			elsif ( to_integer(unsigned(dma_memory(7))) > to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 2 + 3*unsigned(DMA_Task_Counter_s)) 	or to_integer(unsigned(dma_memory(8))) < to_integer(unsigned(dma_memory(to_integer(unsigned(APB_PADDR_i)))) + 2 + 3*unsigned(DMA_Task_Counter_s)) ) and state_IN = read_flags_IN then
 				DMA_Error_State_s <= x"00000008";
-			elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(2)))  or	 to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(2))))  and state_IN = read_ram_spi_IN then
+			elsif ( to_integer(unsigned(dma_memory(7))) > to_integer(unsigned(dma_memory(3)))  or	 to_integer(unsigned(dma_memory(8))) < to_integer(unsigned(dma_memory(3))))  and state_IN = read_ram_spi_IN then
 				DMA_Error_State_s <= x"00000009";	
 			elsif  (SPI_ERROR_i =  '1' and state_spi = wait_spi and state_in = write_spi_IN) or DMA_Error_State_s = x"0000000A" then
 				DMA_Error_State_s <= x"0000000A";
@@ -363,7 +364,7 @@ begin
 				DMA_Error_State_s <= x"0000000C";
 			elsif  SPI_ERROR_i =  '1' and state_spi = exchange_spi and state_in = write_spi_IN  then
 				DMA_Error_State_s <= x"0000000D";
-			elsif ( to_integer(unsigned(dma_memory(6))) > to_integer(unsigned(dma_memory(3)))  or	 to_integer(unsigned(dma_memory(7))) < to_integer(unsigned(dma_memory(3))))  and state_IN = write_ram_IN then
+			elsif ( to_integer(unsigned(dma_memory(7))) > to_integer(unsigned(dma_memory(4)))  or	 to_integer(unsigned(dma_memory(8))) < to_integer(unsigned(dma_memory(4))))  and state_IN = write_ram_IN then
 				DMA_Error_State_s <= x"0000000E";
 			else
 				DMA_Error_State_s <= x"00000000";
@@ -378,19 +379,21 @@ begin
 			if  state_APB = idle_APB then
 				dma_memory <=  (others => (others => 'Z'));
 			else
-				dma_memory(0) <= DMA_Error_State_s;
-				dma_memory(1) <= DMA_Task_Counter_s & "000000000000000000000000";
-				dma_memory(2) <= DMA_Address_Source_s;
-				dma_memory(3) <= DMA_Address_Destination_s;
-				dma_memory(4) <= DMA_Task_Flags_s;
-				dma_memory(5) <= DMA_Data_s;
-				if state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000110" then
-					dma_memory(to_integer(unsigned(APB_PADDR_i))) <= APB_PWDATA_i;
+				if state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000000" then
+					dma_memory(to_integer(unsigned(APB_PADDR_i))) <= APB_PWDATA_i; 
 				elsif state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000111" then
 					dma_memory(to_integer(unsigned(APB_PADDR_i))) <= APB_PWDATA_i;
 				elsif state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00001000" then
 					dma_memory(to_integer(unsigned(APB_PADDR_i))) <= APB_PWDATA_i;
+				elsif state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00001001" then
+					dma_memory(to_integer(unsigned(APB_PADDR_i))) <= APB_PWDATA_i;
 				end if;
+				dma_memory(1) <= DMA_Error_State_s;
+				dma_memory(2) <= DMA_Task_Counter_s & "000000000000000000000000";
+				dma_memory(3) <= DMA_Address_Source_s;
+				dma_memory(4) <= DMA_Address_Destination_s;
+				dma_memory(5) <= DMA_Task_Flags_s;
+				dma_memory(6) <= DMA_Data_s;
 			end if;
 		end if;
 	end process;  
