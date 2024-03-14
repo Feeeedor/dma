@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.dma;    
 use work.dma_tests;
+
 entity dma_tb is
 end entity dma_tb;
 
@@ -17,6 +18,7 @@ architecture tb_arch of dma_tb is
 	 
    signal Clk     : std_logic ;
    signal Resetn  : std_logic ;
+	
    signal APB_PADDR_i    : std_logic_vector(7 downto 0);
    signal APB_PENABLE_i  : std_logic ;
 	signal APB_PSELx         :  STD_LOGIC;
@@ -25,6 +27,7 @@ architecture tb_arch of dma_tb is
    signal APB_PREADY_o   : std_logic;
    signal APB_PRDATA_o   : std_logic_vector(31 downto 0);
 	signal APB_PERROR_o      :  STD_LOGIC;
+	
 	signal o_tx_start_spi    :  STD_LOGIC;
    signal i_tx_end          :  STD_LOGIC;
    signal o_address         :  STD_LOGIC_VECTOR(31 downto 0);
@@ -76,7 +79,7 @@ begin
 			data_out_1 => data_out_1,
 		
 			i_tx_end => i_tx_end,
-			i_data_parallel => i_data_parallel ,
+			i_data_parallel => i_data_parallel,
 			i_error => i_error 
 		  );
 
