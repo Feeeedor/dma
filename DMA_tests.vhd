@@ -20,7 +20,7 @@ port (
 end entity;
 
 architecture test of dma_tests is
-constant second 	: time := 10 us;
+constant second 	: time := 10 ns;
 signal Clk_s : std_logic;
 
 begin
@@ -53,25 +53,32 @@ begin
 	---------------------------MRAMtoRAM------------------------------
    wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
 	APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
@@ -83,9 +90,15 @@ begin
 	wait until rising_edge(Clk_s);--12
 	wait until rising_edge(Clk_s);--13
 	wait until rising_edge(Clk_s);--14
+	 wait until rising_edge(Clk_s);--1
+	  wait until rising_edge(Clk_s);--1
+	   wait until rising_edge(Clk_s);--1
 	i_tx_end <= '1';
 	wait for 10 ns;
 	i_tx_end <= '0';
+		 wait until rising_edge(Clk_s);--1
+	  wait until rising_edge(Clk_s);--1
+	   wait until rising_edge(Clk_s);--1
 	i_data_parallel <= x"00000300";
 	wait until rising_edge(Clk_s);--15
 	i_tx_end <= '1';
@@ -117,25 +130,32 @@ begin
 	-----------------------RAMtoMRAM-----------------------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
 	APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
@@ -148,9 +168,15 @@ begin
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
 	wait until rising_edge(Clk_s);--13
+		 wait until rising_edge(Clk_s);--1
+	  wait until rising_edge(Clk_s);--1
+	   wait until rising_edge(Clk_s);--1
 	i_tx_end <= '1';
 	wait for 10 ns;
 	i_tx_end <= '0';
+		 wait until rising_edge(Clk_s);--1
+	  wait until rising_edge(Clk_s);--1
+	   wait until rising_edge(Clk_s);--1
 	wait until rising_edge(Clk_s);--14
 	i_tx_end <= '1';
 	wait for 10 ns;
@@ -177,27 +203,34 @@ begin
 	wait until rising_edge(Clk_s);--22
 	wait until rising_edge(Clk_s);--23
 	-----------------------------------MRAMtoRAM and RAMtoMRAM-------------------------------
-	wait until rising_edge(Clk_s);--1	 
+	 wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
 	APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
@@ -209,9 +242,15 @@ begin
 	wait until rising_edge(Clk_s);--12
 	wait until rising_edge(Clk_s);--13
 	wait until rising_edge(Clk_s);--14
+		 wait until rising_edge(Clk_s);--1
+	  wait until rising_edge(Clk_s);--1
+	   wait until rising_edge(Clk_s);--1
 	i_tx_end <= '1';
 	wait for 10 ns;
 	i_tx_end <= '0';
+		 wait until rising_edge(Clk_s);--1
+	  wait until rising_edge(Clk_s);--1
+	   wait until rising_edge(Clk_s);--1
 	i_data_parallel <= x"00000300";
 	wait until rising_edge(Clk_s);--15
 	i_tx_end <= '1';
@@ -233,9 +272,15 @@ begin
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--24
 	wait until rising_edge(Clk_s);--25
+		 wait until rising_edge(Clk_s);--1
+	  wait until rising_edge(Clk_s);--1
+	   wait until rising_edge(Clk_s);--1
 	i_tx_end <= '1';
 	wait for 10 ns;
 	i_tx_end <= '0';
+		 wait until rising_edge(Clk_s);--1
+	  wait until rising_edge(Clk_s);--1
+	   wait until rising_edge(Clk_s);--1
 	wait until rising_edge(Clk_s);--26
 	i_tx_end <= '1';
 	wait for 10 ns;
@@ -264,6 +309,57 @@ begin
 	wait until rising_edge(Clk_s);--37
 	wait for 10 ns;
 	Resetn <= '1';
+		-----------------------------чтение0-------------------------
+	wait until rising_edge(Clk_s);--1	 
+   APB_PSELx <= '1';
+	APB_PADDR_i <="00000000";
+	APB_PWRITE_i <= '0';
+	wait until rising_edge(Clk_s);--2
+	wait until rising_edge(Clk_s);--3
+	APB_PSELx <= 'Z';
+	APB_PADDR_i <="ZZZZZZZZ";
+	APB_PWRITE_i <= 'Z';
+	Resetn <= '0';
+	wait until rising_edge(Clk_s);--7
+	wait until rising_edge(Clk_s);--8
+	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--10
+	wait for 10 ns;
+	Resetn <= '1';
+			-----------------------------чтение1-------------------------
+	wait until rising_edge(Clk_s);--1	 
+   APB_PSELx <= '1';
+	APB_PADDR_i <="00000001";
+	APB_PWRITE_i <= '0';
+	wait until rising_edge(Clk_s);--2
+	wait until rising_edge(Clk_s);--3
+	APB_PSELx <= 'Z';
+	APB_PADDR_i <="ZZZZZZZZ";
+	APB_PWRITE_i <= 'Z';
+	Resetn <= '0';
+	wait until rising_edge(Clk_s);--7
+	wait until rising_edge(Clk_s);--8
+	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--10
+	wait for 10 ns;
+	Resetn <= '1';
+			-----------------------------чтение2-------------------------
+	wait until rising_edge(Clk_s);--1	 
+   APB_PSELx <= '1';
+	APB_PADDR_i <="00000010";
+	APB_PWRITE_i <= '0';
+	wait until rising_edge(Clk_s);--2
+	wait until rising_edge(Clk_s);--3
+	APB_PSELx <= 'Z';
+	APB_PADDR_i <="ZZZZZZZZ";
+	APB_PWRITE_i <= 'Z';
+	Resetn <= '0';
+	wait until rising_edge(Clk_s);--7
+	wait until rising_edge(Clk_s);--8
+	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--10
+	wait for 10 ns;
+	Resetn <= '1';
 	-----------------------------0b0001-------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
@@ -273,7 +369,7 @@ begin
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	wait until rising_edge(Clk_s);--4
 	wait until rising_edge(Clk_s);--5
@@ -291,16 +387,26 @@ begin
 	---------------------0b0010 ---------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
+	APB_PENABLE_i <= '1';
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	wait until rising_edge(Clk_s);--4
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	wait until rising_edge(Clk_s);--4
 	wait until rising_edge(Clk_s);--5
+	APB_PENABLE_i <= '0';
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
@@ -315,25 +421,35 @@ begin
 	---------------------0b0011---------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<=x"00000110";
 	wait until rising_edge(Clk_s);--5
+	APB_PENABLE_i <= '1';
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	wait until rising_edge(Clk_s);--4
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	wait until rising_edge(Clk_s);--6
 	wait until rising_edge(Clk_s);--7
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--8
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--9
@@ -345,31 +461,41 @@ begin
 	---------------------0b0100---------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000110";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--6
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--7
+	APB_PENABLE_i <= '1';
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	wait until rising_edge(Clk_s);--4
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	wait until rising_edge(Clk_s);--8
 	wait until rising_edge(Clk_s);--9
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--10
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--11
@@ -381,36 +507,45 @@ begin
 	---------------------0b0110---------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000111";
 	wait until rising_edge(Clk_s);--7
 	APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	wait until rising_edge(Clk_s);--9
 	wait until rising_edge(Clk_s);--9 
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	wait until rising_edge(Clk_s);--10
 	wait until rising_edge(Clk_s);--12
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--11
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--12
@@ -422,25 +557,32 @@ begin
 	---------------------0b0111---------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"000000F0";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
@@ -449,13 +591,14 @@ begin
    wait until rising_edge(Clk_s);--10
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	wait until rising_edge(Clk_s);--10
 	wait until rising_edge(Clk_s);--12
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--11
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--12
@@ -467,25 +610,32 @@ begin
 	---------------------------0b1000------------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"000000EF";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
@@ -496,13 +646,14 @@ begin
    wait until rising_edge(Clk_s);--10
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	wait until rising_edge(Clk_s);--10
 	wait until rising_edge(Clk_s);--12
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--11
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--12
@@ -514,25 +665,32 @@ begin
 	-----------------------0b1001-----------------------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000120";
 	wait until rising_edge(Clk_s);--8
@@ -545,13 +703,14 @@ begin
 	wait until rising_edge(Clk_s);--11
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	wait until rising_edge(Clk_s);--10
 	wait until rising_edge(Clk_s);--12
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--11
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--12
@@ -563,25 +722,32 @@ begin
 	-----------------------0b1010-----------------------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
@@ -598,7 +764,7 @@ begin
 	wait until rising_edge(Clk_s);--13
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	i_error <='0';
 	wait until rising_edge(Clk_s);--10
@@ -606,6 +772,7 @@ begin
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--11
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--12
@@ -617,25 +784,32 @@ begin
 	-----------------------0b1101-----------------------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
@@ -656,7 +830,7 @@ begin
 	wait until rising_edge(Clk_s);--13
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	i_error <='0';
 	wait until rising_edge(Clk_s);--10
@@ -664,6 +838,7 @@ begin
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--11
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--12
@@ -675,25 +850,32 @@ begin
 	---------------------------0b1011------------------------------
    wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
@@ -708,7 +890,7 @@ begin
 	wait until rising_edge(Clk_s);--13
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	i_error <='0';
 	wait until rising_edge(Clk_s);--10
@@ -716,6 +898,7 @@ begin
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
+	APB_PENABLE_i <= '0';
 	wait until rising_edge(Clk_s);--11
 	Resetn <= '0';
 	wait until rising_edge(Clk_s);--12
@@ -727,25 +910,32 @@ begin
 	---------------------------0b1100------------------------------
    wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
@@ -764,8 +954,8 @@ begin
 	wait until rising_edge(Clk_s);--13
 	wait until rising_edge(Clk_s);--13
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PENABLE_i <= '0';
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	i_error <='0';
 	wait until rising_edge(Clk_s);--10
@@ -784,25 +974,32 @@ begin
 	---------------------------0b1110------------------------------
 	wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
@@ -828,7 +1025,7 @@ begin
 	wait until rising_edge(Clk_s);--13
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
-	APB_PADDR_i <="00000000";
+	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
 	i_error <='0';
 	wait until rising_edge(Clk_s);--10
@@ -847,25 +1044,32 @@ begin
 	---------------------------reset------------------------------
    wait until rising_edge(Clk_s);--1	 
    APB_PSELx <= '1';
-	APB_PADDR_i <="00000110";
+	APB_PADDR_i <="00000111";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--2
 	APB_PWDATA_i<=x"00000010";
 	wait until rising_edge(Clk_s);--3
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <= "00000111";
+	APB_PADDR_i <= "00001000";
 	APB_PWRITE_i <= '1';
 	wait until rising_edge(Clk_s);--4
 	APB_PWDATA_i<= x"000000F0";
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	APB_PADDR_i <="00001000";
+	APB_PADDR_i <="00001001";
 	wait until rising_edge(Clk_s);--4
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000011";
 	wait until rising_edge(Clk_s);--6
-	wait until rising_edge(Clk_s);--7
-	APB_PENABLE_i <= '1';
+		APB_PENABLE_i <= '1';
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	APB_PADDR_i <= "00000000";
+	APB_PWRITE_i <= '1';
+	wait until rising_edge(Clk_s);--4
+	APB_PWDATA_i<= x"00000001";
+	wait until rising_edge(Clk_s);--5
+	APB_PWRITE_i <= 'Z' ;
+	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9

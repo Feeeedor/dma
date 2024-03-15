@@ -49,20 +49,20 @@ begin
          APB_PREADY_o    => APB_PREADY_o,
          APB_PRDATA_o    => APB_PRDATA_o,
 			APB_PERROR_o    => APB_PERROR_o,
-			o_tx_start_spi  => o_tx_start_spi,
-			i_tx_end_spi        => i_tx_end,  
-			o_address_spi       => o_address,  
-			o_instruction_spi   => o_instruction,   
-			i_data_parallel_spi => i_data_parallel, 
-			o_data_parallel_spi => o_data_parallel,  
-			i_error_spi         => i_error,  
+			SPI_START_o  => o_tx_start_spi,
+			SPI_END_i        => i_tx_end,  
+			SPI_ADDRESS_o       => o_address,  
+			SPI_INSTRUCTION_o   => o_instruction,   
+			SPI_RDATA_i => i_data_parallel, 
+			SPI_WDATA_o => o_data_parallel,  
+			SPI_ERROR_i         => i_error,  
 			
 			
-			wr_en_1_ram         => wr_en_1,
-			data_in_1_ram       => data_in_1,
-			addr_in_1_ram    	 => addr_in_1,
-			port_en_1_ram    	 => port_en_1,
-			data_out_1_ram      => data_out_1
+			RAM_WRITE_o        => wr_en_1,
+			RAM_WDATA_o       => data_in_1,
+			RAM_ADDRESS_o    	 => addr_in_1,
+			RAM_PORTENABLER_o    	 => port_en_1,
+			RAM_RDATA_i      => data_out_1
          );
 
 
