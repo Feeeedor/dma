@@ -82,9 +82,12 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--10
 	data_out_1 <= x"00000000";
+	wait until rising_edge(Clk_s);--11
 	wait until rising_edge(Clk_s);--11
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
@@ -159,11 +162,15 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
+	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000002";
 	wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--10
 	data_out_1 <= x"00111000";
+	wait until rising_edge(Clk_s);--11
 	wait until rising_edge(Clk_s);--11
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
@@ -234,10 +241,13 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000001";
 	wait until rising_edge(Clk_s);--11
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
 	wait until rising_edge(Clk_s);--13
@@ -263,12 +273,16 @@ begin
 	wait until rising_edge(Clk_s);--19
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--20
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--21
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000002";
 	wait until rising_edge(Clk_s);--22
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00111000";
 	wait until rising_edge(Clk_s);--23
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--24
 	wait until rising_edge(Clk_s);--25
@@ -520,7 +534,7 @@ begin
 	wait until rising_edge(Clk_s);--5
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PADDR_i <="00001001";
-	wait until rising_edge(Clk_s);--4
+	wait until rising_edge(Clk_s);--6
 	APB_PWRITE_i <= '1';
 	APB_PWDATA_i<=x"00000111";
 	wait until rising_edge(Clk_s);--7
@@ -528,30 +542,32 @@ begin
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PADDR_i <= "00000000";
 	APB_PWRITE_i <= '1';
-	wait until rising_edge(Clk_s);--4
+	wait until rising_edge(Clk_s);--8
 	APB_PWDATA_i<= x"00000001";
-	wait until rising_edge(Clk_s);--5
+	wait until rising_edge(Clk_s);--9
 	APB_PWRITE_i <= 'Z' ;
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	wait until rising_edge(Clk_s);--8
-	wait until rising_edge(Clk_s);--9
-	wait until rising_edge(Clk_s);--9 
+	wait until rising_edge(Clk_s);--10
+	data_out_1 <= x"00000020";
+	wait until rising_edge(Clk_s);--11
+	wait until rising_edge(Clk_s);--12
+	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
 	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
-	wait until rising_edge(Clk_s);--10
-	wait until rising_edge(Clk_s);--12
+	wait until rising_edge(Clk_s);--13
+	wait until rising_edge(Clk_s);--14
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
 	APB_PENABLE_i <= '0';
-	wait until rising_edge(Clk_s);--11
-	Resetn <= '0';
-	wait until rising_edge(Clk_s);--12
-	wait until rising_edge(Clk_s);--13
-	wait until rising_edge(Clk_s);--14
 	wait until rising_edge(Clk_s);--15
+	Resetn <= '0';
+	wait until rising_edge(Clk_s);--16
+	wait until rising_edge(Clk_s);--17
+	wait until rising_edge(Clk_s);--18
+	wait until rising_edge(Clk_s);--19
 	wait for 10 ns;
 	Resetn <= '1';
 	---------------------0b0111---------------------------
@@ -587,14 +603,16 @@ begin
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
 	wait until rising_edge(Clk_s);--9
-	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--10
-	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	wait until rising_edge(Clk_s);--10
+	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+		APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
 	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
-	wait until rising_edge(Clk_s);--10
 	wait until rising_edge(Clk_s);--12
+	wait until rising_edge(Clk_s);--11
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
 	APB_PWRITE_i <= 'Z';
@@ -639,16 +657,19 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
+	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--8
 	wait until rising_edge(Clk_s);--9
-	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	data_out_1 <= x"00000000";
    wait until rising_edge(Clk_s);--10
-	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	wait until rising_edge(Clk_s);--10
+	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+		APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
 	APB_PADDR_i <="00000001";
 	APB_PWRITE_i <= '0';
-	wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--12
 	wait until rising_edge(Clk_s);--12
 	APB_PSELx <= 'Z';
 	APB_PADDR_i <="ZZZZZZZZ";
@@ -694,13 +715,17 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000120";
 	wait until rising_edge(Clk_s);--8
+	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000002";
 	wait until rising_edge(Clk_s);--10
-	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+	wait until rising_edge(Clk_s);--10
+	data_out_1 <= x"00111000";
 	wait until rising_edge(Clk_s);--11
 	wait until rising_edge(Clk_s);--11
+		data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PWDATA_i<="ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	APB_PENABLE_i <= 'Z';
 	APB_PADDR_i <="00000001";
@@ -751,11 +776,15 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
+	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000002";
 	wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--10
 	data_out_1 <= x"00111000";
+	wait until rising_edge(Clk_s);--11
 	wait until rising_edge(Clk_s);--11
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
@@ -813,11 +842,15 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--8
+	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000002";
 	wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--10
 	data_out_1 <= x"00111000";
+	wait until rising_edge(Clk_s);--11
 	wait until rising_edge(Clk_s);--11
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
@@ -879,9 +912,12 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--10
 	data_out_1 <= x"00000000";
+	wait until rising_edge(Clk_s);--11
 	wait until rising_edge(Clk_s);--11
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
@@ -939,9 +975,12 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--10
 	data_out_1 <= x"00000000";
+	wait until rising_edge(Clk_s);--11
 	wait until rising_edge(Clk_s);--11
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
@@ -1003,9 +1042,12 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000130";
    wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--10
 	data_out_1 <= x"00000000";
+	wait until rising_edge(Clk_s);--11
 	wait until rising_edge(Clk_s);--11
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
@@ -1073,10 +1115,13 @@ begin
 	wait until rising_edge(Clk_s);--8
 	data_out_1 <= x"00000020";
 	wait until rising_edge(Clk_s);--9
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000030";
    wait until rising_edge(Clk_s);--10
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= x"00000000";
 	wait until rising_edge(Clk_s);--11
+	wait until rising_edge(Clk_s);--9
 	data_out_1 <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 	wait until rising_edge(Clk_s);--12
 	wait until rising_edge(Clk_s);--13
