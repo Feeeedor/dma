@@ -56,7 +56,7 @@ begin
 			CASE state_APB is 
 				
 				when  idle_APB =>
-					if APB_PSELx='1' then    
+					if APB_PENABLE_i = '1' and APB_PSELx='1' then    
 						state_APB <= setup_APB;
 					end if;
 				
@@ -97,7 +97,7 @@ begin
 						end if;
 						
 					when exchange_SPI =>
-						if(SPI_END_i = '1') or SPI_ERROR_i = '1' then
+						if SPI_END_i = '1' or SPI_ERROR_i = '1' then --было если енд равен 1
 							state_SPI <= idle_SPI;
 						end if;
 							
@@ -117,7 +117,7 @@ begin
 					CASE state_IN is 
 						
 						when  idle_IN =>
-							if state_APB = access_APB   and dma_memory(0)(0) = '1' then 
+							if APB_PENABLE_i = '1' and state_APB = access_APB   and dma_memory(0)(0) = '1' and dma_memory(10)(3) = '1' then 
 								state_IN <= setup_IN;
 							end if;	
 							
@@ -129,17 +129,17 @@ begin
 							end if;
 							
 						when read_source_IN =>	
-							if dma_memory(3) /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+							if dma_memory(10)(4) = '1' then
 								state_IN <= read_dest_IN;
 							end if;
 							
 						when read_dest_IN =>
-							if dma_memory(4) /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+							if dma_memory(10)(5) = '1' then
 								state_IN <= read_flags_IN;
 							end if;
 							
 						when read_flags_IN =>
-							if dma_memory(5) /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+							if dma_memory(10)(6) = '1' then
 								if dma_memory(5)(1) = '1' then
 									state_IN <= read_ram_spi_IN;
 								else
@@ -148,7 +148,7 @@ begin
 							end if;
 						
 						when read_ram_spi_IN =>
-							if dma_memory(6) /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+							if dma_memory(10)(7) = '1'  then
 								state_IN <= setup_write_spi_IN;
 							end if;
 							
@@ -166,15 +166,16 @@ begin
 							state_IN <= read_spi_IN;
 							
 						when read_spi_IN =>
-							if state_SPI = idle_SPI then 
+							if dma_memory(10)(8) = '1' then 
 								state_IN <= write_ram_IN;
 							elsif SPI_ERROR_i = '1' then 
 								state_IN <= error_IN;	 
 							end if;
 							
 						when write_ram_IN =>
-							state_IN <= end_internal_IN;
-							
+							if dma_memory(10)(11) = '1' then 
+								state_IN <= end_internal_IN;
+							end if;
 						when end_IN =>
 							state_IN <= idle_IN;
 							
@@ -193,17 +194,19 @@ begin
 	process (Clk, state_APB, state_SPI, state_IN)
 	begin
 		----------------------------------APB_PREADY_s-----------------------------------------
-		if state_APB = idle_APB then
+		if Resetn = '0' then
 			APB_PREADY_s <= '1';
-		elsif state_APB = setup_APB then
+		elsif APB_PENABLE_i = '1' and state_APB = setup_APB then
 			APB_PREADY_s <= '0';
 		elsif state_IN = end_IN or dma_memory(1) /= x"00000000"  then 
 			APB_PREADY_s <= '1';
-		elsif APB_PADDR_i = "00000111" and dma_memory(7) /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+		elsif APB_PWRITE_i = '1' and APB_PADDR_i = "00000111" and dma_memory(10)(0) = '1' then
 			APB_PREADY_s <= '1';
-		elsif APB_PADDR_i = "00001000" and dma_memory(8) /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+		elsif APB_PWRITE_i = '1' and APB_PADDR_i = "00001000" and dma_memory(10)(1) = '1' then
 			APB_PREADY_s <= '1';
-		elsif APB_PADDR_i = "00001001" and dma_memory(9) /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+		elsif APB_PWRITE_i = '1' and APB_PADDR_i = "00001001" and dma_memory(10)(2) = '1' then
+			APB_PREADY_s <= '1';
+		elsif dma_memory(10)(9) = '1' then
 			APB_PREADY_s <= '1';
 		else
 			APB_PREADY_s <= APB_PREADY_s;
@@ -265,7 +268,7 @@ begin
 			SPI_INSTRUCTION_o <= 'Z';
 		end if;
 		----------------------------------SPI_WDATA_o-----------------
-		if state_IN = write_SPI_IN then
+		if state_SPI = exchange_SPI  and state_IN = write_SPI_IN then
 			SPI_WDATA_o <= dma_memory(6);
 		else
 			SPI_WDATA_o <=  (others => 'Z');
@@ -274,7 +277,7 @@ begin
 		if Resetn = '0' then
         APB_PRDATA_o <= (others => 'Z');
 		elsif rising_edge (Clk) then
-         if APB_PWRITE_i = '0' and state_APB = setup_APB  then
+         if APB_PENABLE_i = '1' and APB_PWRITE_i = '0' and state_APB = setup_APB  then
             APB_PRDATA_o <= dma_memory(to_integer(unsigned(APB_PADDR_i)));
 			elsif APB_PREADY_s = '1' then 
 				APB_PRDATA_o <= (others => 'Z');
@@ -292,16 +295,16 @@ begin
 		end if;
 	end process;   
   
-
+	process_registers:
 	process (Clk, Resetn)
 	begin
 				------------------dma_memory(0)------------------
 		if Resetn = '0' then
 			dma_memory(0) <= (others => '0');
 		elsif rising_edge (Clk) then
-			if state_APB = setup_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000000" then
+			if APB_PENABLE_i = '1' and state_APB = setup_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000000" then
 				dma_memory(0) <= APB_PWDATA_i;
-			elsif  state_APB = setup_APB then 
+			elsif  state_IN = end_IN then 
 				dma_memory(0) <= (others => '0');
 			else
 			end if;
@@ -312,7 +315,7 @@ begin
 		elsif rising_edge (Clk) then
 			if state_APB = idle_APB then 
 				dma_memory(1) <= x"00000000";
-			elsif  state_IN /= error_IN and state_APB = setup_APB and APB_PADDR_i /= "00000111" and APB_PADDR_i /= "00001000" and APB_PADDR_i /= "00001001" and APB_PWRITE_i = '1' and APB_PADDR_i /= "00000000"then	
+			elsif  state_IN /= error_IN and state_APB = setup_APB and APB_PADDR_i /= "00000111" and APB_PADDR_i /= "00001000" and APB_PADDR_i /= "00001001" and APB_PWRITE_i = '1' and APB_PADDR_i /= "00000000" then	
 				dma_memory(1) <= x"00000001";
 			elsif  state_IN /= error_IN   and dma_memory(7) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" and dma_memory(0)(0) = '1' then	
 				dma_memory(1) <= x"00000002";
@@ -350,107 +353,242 @@ begin
 		if Resetn = '0' then
 			dma_memory(2) <= x"00000000";
 		elsif rising_edge (Clk) then
-			if state_IN = idle_IN or  state_APB = idle_APB then
+			if state_IN = idle_IN or  state_IN = end_IN then
             dma_memory(2)(15 downto 0) <= x"0000";
 			elsif  state_IN = end_internal_IN then
 				dma_memory(2)(15 downto 0) <= std_logic_vector(unsigned(dma_memory(2)(15 downto 0)) + 1);
 			else
 			end if;
 		end if;	 
-	------------------dma_memory(3)----DMA_Address_Source_s--------------
+	------------------dma_memory(3)----DMA_Address_Source--------------
 		if Resetn = '0' then
-			dma_memory(3) <= (others => 'Z');
+			dma_memory(3) <= (others => '0');
 		elsif rising_edge (Clk) then
 			if  state_IN = idle_IN then
-				dma_memory(3) <= (others => 'Z');
+				dma_memory(3) <= (others => '0');
 			elsif  state_IN = end_internal_IN then
-				dma_memory(3) <= (others => 'Z');
-			elsif state_IN = read_source_IN and dma_memory(3) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(3) <= (others => '0');
+			elsif state_IN = read_source_IN and dma_memory(10)(4) = '0' then
 				dma_memory(3) <= RAM_RDATA_i;
 			else
 			end if;
 		end if;	 	
-------------------dma_memory(4)----DMA_Address_Destination_s--------------
+------------------dma_memory(4)----DMA_Address_Destination--------------
 		if Resetn = '0' then
-			dma_memory(4) <= (others => 'Z');
+			dma_memory(4) <= (others => '0');
 		elsif rising_edge (Clk) then
 			if  state_IN = idle_IN then
-				dma_memory(4) <=  (others => 'Z');
+				dma_memory(4) <=  (others => '0');
 			elsif  state_IN = end_internal_IN then
-				dma_memory(4) <= (others => 'Z');
-			elsif state_IN = read_dest_IN and dma_memory(4) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"  then
+				dma_memory(4) <= (others => '0');
+			elsif state_IN = read_dest_IN and dma_memory(10)(5) = '0'  then
 				dma_memory(4) <= RAM_RDATA_i;
 			else 
 			end if;
 		end if;		
-------------------dma_memory(5)----DMA_Task_Flags_s--------------
+------------------dma_memory(5)----DMA_Task_Flags--------------
 		if Resetn = '0' then
-			dma_memory(5) <= (others => 'Z');
+			dma_memory(5) <= (others => '0');
 		elsif rising_edge (Clk) then
 			if  state_IN = idle_IN then
-				dma_memory(5) <=  (others => 'Z');
+				dma_memory(5) <=  (others => '0');
 			elsif  state_IN = read_source_IN then
-				dma_memory(5) <= (others => 'Z');
-			elsif state_IN = read_flags_IN  and dma_memory(5) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(5) <= (others => '0');
+			elsif state_IN = read_flags_IN  and dma_memory(10)(6) = '0' then
 				dma_memory(5) <= RAM_RDATA_i;
 			else
 			end if;
 		end if;
-		------------------dma_memory(6)----DMA_Data_s--------------
+		------------------dma_memory(6)----DMA_Data--------------
 		if Resetn = '0' then
-			dma_memory(6) <= (others => 'Z');
+			dma_memory(6) <= (others => '0');
 		elsif rising_edge (Clk) then
 			if  state_SPI = exchange_SPI  and state_IN = read_spi_IN then
 				dma_memory(6) <= SPI_RDATA_i;
-			elsif  state_IN = read_ram_spi_IN and dma_memory(6) = "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+			elsif  state_IN = read_ram_spi_IN and dma_memory(10)(7) = '0' then
 				dma_memory(6) <= RAM_RDATA_i;
 			elsif  state_IN = setup_IN then  
-				dma_memory(6) <=  (others => 'Z');
-			elsif  state_APB = idle_APB then  
-				dma_memory(6) <=  (others => 'Z');
+				dma_memory(6) <=  (others => '0');
+			elsif  state_IN = end_internal_IN then  
+				dma_memory(6) <=  (others => '0');
 			else
 			end if;
 		end if;	
 
 		------------------dma_memory(7)------------------
 		if Resetn = '0' then
-			dma_memory(7) <= (others => 'Z');
+			dma_memory(7) <= (others => '0');
 		elsif rising_edge (Clk) then
-			if state_APB = setup_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000111" then
+			if APB_PENABLE_i = '1' and state_APB = setup_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000111" then
 				dma_memory(7) <= APB_PWDATA_i;
-			elsif  state_APB = idle_APB then 
-				dma_memory(7) <= (others => 'Z');
 			else
 			end if;
 		end if;	 	
 		------------------dma_memory(8)------------------
 		if Resetn = '0' then
-			dma_memory(8) <= (others => 'Z');
+			dma_memory(8) <= (others => '0');
 		elsif rising_edge (Clk) then
-			if state_APB = setup_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00001000" then
+			if APB_PENABLE_i = '1' and state_APB = setup_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00001000" then
 				dma_memory(8) <= APB_PWDATA_i;
-			elsif  state_APB = idle_APB then 
-				dma_memory(8) <= (others => 'Z');
 			else
 			end if;
 		end if;	
 		------------------dma_memory(9)------------------
 		if Resetn = '0' then
-			dma_memory(9) <= (others => 'Z');
+			dma_memory(9) <= (others => '0');
 		elsif rising_edge (Clk) then
-			if state_APB = setup_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00001001" then
+			if APB_PENABLE_i = '1' and state_APB = setup_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00001001" then
 				dma_memory(9) <= APB_PWDATA_i;
-			elsif  state_APB = idle_APB then 
-				dma_memory(9) <= (others => 'Z');
+			elsif  state_IN = end_IN then 
+				dma_memory(9) <= (others => '0');
+			else
+			end if;
+		end if;
+		------------------dma_memory(10)(0)------------------
+		if Resetn = '0' then
+			dma_memory(10)(0) <= '0';
+		elsif rising_edge (Clk) then
+			if APB_PENABLE_i = '1' and state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000111" and APB_PWDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(0) <= '1';
 			else
 			end if;
 		end if;	
-		------------------dma_memory(11 to 31)------------------
+		------------------dma_memory(10)(1)------------------
 		if Resetn = '0' then
-			dma_memory(10 to 31) <= (others => (others => 'Z'));
+			dma_memory(10)(1) <= '0';
+		elsif rising_edge (Clk) then
+			if APB_PENABLE_i = '1' and state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00001000" and APB_PWDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(1) <= '1';
+			else
+			end if;
+		end if;
+		------------------dma_memory(10)(2)------------------
+		if Resetn = '0' then
+			dma_memory(10)(2) <= '0';
+		elsif rising_edge (Clk) then
+			if state_IN = end_IN then
+				dma_memory(10)(2) <= '0';
+			elsif APB_PENABLE_i = '1' and state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00001001" and APB_PWDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(2) <= '1';
+			else
+			end if;
+		end if;	
+			------------------dma_memory(10)(3)------------------
+		if Resetn = '0' then
+			dma_memory(10)(3) <= '0';
+		elsif rising_edge (Clk) then
+			if state_IN = end_IN then
+				dma_memory(10)(3) <= '0';
+			elsif APB_PENABLE_i = '1' and state_APB = access_APB and APB_PWRITE_i = '1' and APB_PADDR_i = "00000000" and APB_PWDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(3) <= '1';
+			else
+			end if;
+		end if;
+				------------------dma_memory(10)(4)------------------
+		if Resetn = '0' then
+			dma_memory(10)(4) <= '0';
+		elsif rising_edge (Clk) then
+			if state_IN = end_internal_IN then
+				dma_memory(10)(4) <= '0';
+			elsif state_IN = read_source_IN and RAM_RDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(4) <= '1';
+			else
+			end if;
+		end if;
+				------------------dma_memory(10)(5)------------------
+		if Resetn = '0' then
+			dma_memory(10)(5) <= '0';
+		elsif rising_edge (Clk) then
+			if state_IN = end_internal_IN then
+				dma_memory(10)(5) <= '0';
+			elsif state_IN = read_dest_IN and RAM_RDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(5) <= '1';
+			else
+			end if;
+		end if;
+				------------------dma_memory(10)(6)------------------
+		if Resetn = '0' then
+			dma_memory(10)(6) <= '0';
+		elsif rising_edge (Clk) then
+			if state_IN = end_internal_IN then
+				dma_memory(10)(6) <= '0';
+			elsif state_IN = read_flags_IN and RAM_RDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(6) <= '1';
+			else
+			end if;
+		end if;
+				------------------dma_memory(10)(7)------------------
+		if Resetn = '0' then
+			dma_memory(10)(7) <= '0';
+		elsif rising_edge (Clk) then
+			if state_IN = end_internal_IN then
+				dma_memory(10)(7) <= '0';
+			elsif state_IN = read_ram_spi_IN and RAM_RDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(7) <= '1';
+			else
+			end if;
+		end if;
+				------------------dma_memory(10)(8)------------------
+		if Resetn = '0' then
+			dma_memory(10)(8) <= '0';
+		elsif rising_edge (Clk) then
+			if state_IN = end_internal_IN then
+				dma_memory(10)(8) <= '0';
+			elsif state_IN = read_spi_IN and SPI_RDATA_i /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" then
+				dma_memory(10)(8) <= '1';
+			else
+			end if;
+		end if;
+						------------------dma_memory(10)(9)------------------
+		if Resetn = '0' then
+			dma_memory(10)(9) <= '0';
+		elsif rising_edge (Clk) then
+			if dma_memory(10)(9) = '1' then
+				dma_memory(10)(9) <= '0';
+			elsif APB_PENABLE_i = '1' and APB_PWRITE_i = '0' and state_APB = access_APB then
+				dma_memory(10)(9) <= '1';
+			else
+			end if;
+		end if;
+								------------------dma_memory(10)(10)------------------
+		if Resetn = '0' then
+			dma_memory(10)(10) <= '0';
+		elsif rising_edge (Clk) then
+			if dma_memory(10)(10) = '1' then
+				dma_memory(10)(10) <= '0';
+			elsif state_IN = write_ram_IN then
+				dma_memory(10)(10) <= '1';
+			else
+			end if;
+		end if;
+										------------------dma_memory(10)(11)------------------
+		if Resetn = '0' then
+			dma_memory(10)(11) <= '0';
+		elsif rising_edge (Clk) then
+			if dma_memory(10)(11) = '1' then
+				dma_memory(10)(11) <= '0';
+			elsif dma_memory(10)(10) = '1' then
+				dma_memory(10)(11) <= '1';
+			else
+			end if;
+		end if;
+		------------------dma_memory(10)(11 to 31)------------------
+		if Resetn = '0' then
+			dma_memory(10)(31 downto 12) <= (others => '0');
 		elsif rising_edge (Clk) then
 			if state_APB = idle_APB then
-				dma_memory(10 to 31) <= (others => (others => 'Z'));
+				dma_memory(10)(31 downto 12) <= (others => '0');
+			else
+			end if;
+		end if;
+		
+		
+		------------------dma_memory(11 to 31)------------------
+		if Resetn = '0' then
+			dma_memory(11 to 31) <= (others => (others => '0'));
+		elsif rising_edge (Clk) then
+			if state_APB = idle_APB then
+				dma_memory(11 to 31) <= (others => (others => '0'));
 			else
 			end if;
 		end if;	
